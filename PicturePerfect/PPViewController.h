@@ -1,7 +1,8 @@
 #import <UIKit/UIKit.h>
+#import <CoreImage/CoreImage.h>
 #import <AVFoundation/AVFoundation.h>
 #import "PPSettingsTableViewController.h"
-@class CIDetector;
+#import "MBProgressHUD.h"
 
 @interface PPViewController : UIViewController <UIGestureRecognizerDelegate, AVCaptureVideoDataOutputSampleBufferDelegate, PPSettingsDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate>
 
@@ -10,6 +11,7 @@
 @property (nonatomic) BOOL checkSmile;
 @property (nonatomic) BOOL checkEyesOpen;
 @property (nonatomic) BOOL takingPicture;
+@property (strong, atomic) MBProgressHUD *hud;
 
 @property (strong, nonatomic) IBOutlet UIView *previewView;
 @property (strong, nonatomic) AVCaptureVideoPreviewLayer *previewLayer;
@@ -29,6 +31,7 @@
 - (IBAction)takePicture:(id)sender;
 - (void)switchCameras;
 - (IBAction)handlePinchGesture:(UIGestureRecognizer *)sender;
+- (IBAction)handleTapGesture:(UIGestureRecognizer *)sender;
 - (IBAction)showSettings:(id)sender;
 
 // settings delegate fcns

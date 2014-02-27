@@ -1,10 +1,8 @@
 #import "PPViewController.h"
-#import <CoreImage/CoreImage.h>
 #import <ImageIO/ImageIO.h>
 #import <AssertMacros.h>
 #import <AssetsLibrary/AssetsLibrary.h>
 #import "PPImageProcessing.h"
-#import "MBProgressHUD.h"
 
 @implementation PPViewController
 
@@ -193,20 +191,29 @@
 		desiredPosition = AVCaptureDevicePositionBack;
 	else
 		desiredPosition = AVCaptureDevicePositionFront;
-	
+  
+  BOOL found = NO;
 	for (AVCaptureDevice *d in [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo]) {
 		if ([d position] == desiredPosition) {
-			[[_previewLayer session] beginConfiguration];
+			[_previewLayer.session beginConfiguration];
 			AVCaptureDeviceInput *input = [AVCaptureDeviceInput deviceInputWithDevice:d error:nil];
-			for (AVCaptureInput *oldInput in [[_previewLayer session] inputs]) {
-				[[_previewLayer session] removeInput:oldInput];
+			for (AVCaptureInput *oldInput in [_previewLayer.session inputs]) {
+				[_previewLayer.session removeInput:oldInput];
 			}
-			[[_previewLayer session] addInput:input];
-			[[_previewLayer session] commitConfiguration];
+			[_previewLayer.session addInput:input];
+			[_previewLayer.session commitConfiguration];
+      found = YES;
 			break;
 		}
 	}
-	_isUsingFrontFacingCamera = !_isUsingFrontFacingCamera;
+  
+  if (found) {
+    _isUsingFrontFacingCamera = (desiredPosition == AVCaptureDevicePositionFront);
+  } else {
+    [_hud setDetailsLabelText:@"I tried really hard but another camera is not available."];
+    [_hud show:YES];
+    [_hud hide:YES afterDelay:5];
+  }
 }
 
 #pragma mark - Still Picture
@@ -218,7 +225,6 @@
     UIImagePickerController *imagePicker = [UIImagePickerController new];
     [imagePicker setDelegate:self];
     [imagePicker setSourceType:UIImagePickerControllerSourceTypePhotoLibrary];
-//    [imagePicker setMediaTypes:@[(NSString *)kUTTypeImage]];
     [imagePicker setAllowsEditing:NO];
     [self presentViewController:imagePicker
                        animated:YES
@@ -226,31 +232,36 @@
   }
 }
 
+- (void)imagePickerController:(UIImagePickerController *)picker
+didFinishPickingMediaWithInfo:(NSDictionary *)info {
+  NSURL *imageUrl = [info objectForKey:UIImagePickerControllerMediaURL];
+  UIImage *image = [UIImage imageWithContentsOfFile:[imageUrl path]];
+  
+  
+}
+
 - (IBAction)takePicture:(id)sender
 {
   _takingPicture = YES;
-  MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-  [hud setMode:MBProgressHUDModeText];
 
   if (_checkSmile) {
-    [hud setDetailsLabelText:@"Smile!"];
+    [_hud setDetailsLabelText:@"Smile, bitches!"];
   } else {
-    [hud setDetailsLabelText:@"Find a face!"];
+    [_hud setDetailsLabelText:@"Find a face!"];
   }
-  [self.view addSubview:hud];
-  [hud show:YES];
+  [_hud show:YES];
 }
 
 - (void)actuallyTakePicture {
   
-  [MBProgressHUD hideAllHUDsForView:self.view animated:YES];
+  [_hud hide:YES];
   if (!_takingPicture)
     return;
 
   _takingPicture = NO;
 
 	AVCaptureConnection *stillImageConnection = [_stillImageOutput connectionWithMediaType:AVMediaTypeVideo];
-	UIDeviceOrientation curDeviceOrientation = [[UIDevice currentDevice] orientation];
+	UIDeviceOrientation curDeviceOrientation = [UIDevice.currentDevice orientation];
 	AVCaptureVideoOrientation avcaptureOrientation = [self avOrientationForDeviceOrientation:curDeviceOrientation];
 	[stillImageConnection setVideoOrientation:avcaptureOrientation];
 	[stillImageConnection setVideoScaleAndCropFactor:_effectiveScale];
@@ -262,8 +273,7 @@
   if (doingFaceDetection)
 		[_stillImageOutput setOutputSettings:@{(id)kCVPixelBufferPixelFormatTypeKey: [NSNumber numberWithInt:kCMPixelFormat_32BGRA]}];
 	else
-		[_stillImageOutput setOutputSettings:[NSDictionary dictionaryWithObject:AVVideoCodecJPEG
-																		forKey:AVVideoCodecKey]]; 
+		[_stillImageOutput setOutputSettings:@{AVVideoCodecKey: AVVideoCodecJPEG}];
 	
 	[_stillImageOutput captureStillImageAsynchronouslyFromConnection:stillImageConnection
 		completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error) {
@@ -271,12 +281,10 @@
 				[self displayErrorOnMainQueue:error withMessage:@"Take picture failed"];
 			} else {
 				if (doingFaceDetection) {
-					// Got an image.
 					NSDictionary *imageOptions = nil;
 					NSNumber *orientation = (__bridge NSNumber *)(CMGetAttachment(imageDataSampleBuffer, kCGImagePropertyOrientation, NULL));
-					if (orientation) {
-						imageOptions = [NSDictionary dictionaryWithObject:orientation forKey:CIDetectorImageOrientation];
-					}
+					if (orientation)
+						imageOptions = @{CIDetectorImageOrientation: orientation};
 					
           // when processing an existing frame we want any new frames to be automatically dropped
           // queueing this block to execute on the videoDataOutputQueue serial queue ensures this
@@ -289,25 +297,24 @@
 						OSStatus err = CreateCGImageFromCVPixelBuffer(CMSampleBufferGetImageBuffer(imageDataSampleBuffer), &srcImage);
 						check(!err);
             UIImageWriteToSavedPhotosAlbum([[UIImage imageWithCGImage:srcImage] imageRotatedByDegrees:90], nil, nil, nil);
-						
+
             if (srcImage)
 							CFRelease(srcImage);
 						
-						CFDictionaryRef attachments = CMCopyDictionaryOfAttachments(kCFAllocatorDefault, 
-																					imageDataSampleBuffer, 
-																					kCMAttachmentMode_ShouldPropagate);
+						CFDictionaryRef attachments = CMCopyDictionaryOfAttachments(kCFAllocatorDefault, imageDataSampleBuffer, kCMAttachmentMode_ShouldPropagate);
             if (attachments)
 							CFRelease(attachments);
 					});
-					
 				} else {
-					// trivial simple JPEG case
 					NSData *jpegData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
 					CFDictionaryRef attachments = CMCopyDictionaryOfAttachments(kCFAllocatorDefault, imageDataSampleBuffer, kCMAttachmentMode_ShouldPropagate);
-					ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
-					[library writeImageDataToSavedPhotosAlbum:jpegData metadata:(__bridge id)attachments completionBlock:^(NSURL *assetURL, NSError *error) {
+					ALAssetsLibrary *library = [ALAssetsLibrary new];
+					[library writeImageDataToSavedPhotosAlbum:jpegData
+                                           metadata:(__bridge id)attachments
+                                    completionBlock:^(NSURL *assetURL, NSError *error) {
 						if (error) {
-							[self displayErrorOnMainQueue:error withMessage:@"Save to camera roll failed"];
+							[self displayErrorOnMainQueue:error
+                                withMessage:@"Save to camera roll failed"];
 						}
 					}];
 					
@@ -605,6 +612,11 @@
                                     context:nil
                                     options:detectorOptions];
   [self toggleFaceDetection:YES];
+  
+  _hud = [[MBProgressHUD alloc] initWithView:self.view];
+  [_hud setMode:MBProgressHUDModeText];
+  [_hud setYOffset:100.f];
+  [self.view addSubview:_hud];
 }
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
@@ -641,6 +653,10 @@
 		[_previewLayer setAffineTransform:CGAffineTransformMakeScale(_effectiveScale, _effectiveScale)];
 		[CATransaction commit];
 	}
+}
+
+- (void)handleTapGesture:(UIGestureRecognizer *)sender {
+  [self switchCameras];
 }
 
 - (IBAction)showSettings:(id)sender {

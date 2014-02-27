@@ -20,6 +20,8 @@
 
 @property (strong, nonatomic) id<PPSettingsDelegate> delegate;
 
+- (IBAction)expandOrContract:(id)sender;
+
 - (IBAction)accuracySwitched:(id)sender;
 - (IBAction)smileSwitched:(id)sender;
 - (IBAction)eyesOpenSwitched:(id)sender;

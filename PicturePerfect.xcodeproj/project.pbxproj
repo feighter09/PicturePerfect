@@ -26,6 +26,8 @@
 		7A0058A218B977D000CB1BBD /* redSquarePNG.png in Resources */ = {isa = PBXBuildFile; fileRef = 7A0058A018B977D000CB1BBD /* redSquarePNG.png */; };
 		7A0058A518B977DB00CB1BBD /* PPImageProcessing.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A0058A418B977DB00CB1BBD /* PPImageProcessing.m */; };
 		7A0058A818B977E900CB1BBD /* PPSettingsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A0058A718B977E900CB1BBD /* PPSettingsTableViewController.m */; };
+		7A4ADA9E18BD8ADE003A0C92 /* Cell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A4ADA9D18BD8ADE003A0C92 /* Cell.m */; };
+		7A4ADAA018BD8AE4003A0C92 /* ExpandingCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7A4ADA9F18BD8AE4003A0C92 /* ExpandingCell.xib */; };
 		7BFAABA3933449CDB9223E42 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C4E874609F84155BAB4D97A /* libPods.a */; };
 /* End PBXBuildFile section */
 
@@ -68,6 +70,9 @@
 		7A0058A418B977DB00CB1BBD /* PPImageProcessing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PPImageProcessing.m; sourceTree = "<group>"; };
 		7A0058A618B977E900CB1BBD /* PPSettingsTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PPSettingsTableViewController.h; sourceTree = "<group>"; };
 		7A0058A718B977E900CB1BBD /* PPSettingsTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PPSettingsTableViewController.m; sourceTree = "<group>"; };
+		7A4ADA9C18BD8ADE003A0C92 /* Cell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Cell.h; sourceTree = "<group>"; };
+		7A4ADA9D18BD8ADE003A0C92 /* Cell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Cell.m; sourceTree = "<group>"; };
+		7A4ADA9F18BD8AE4003A0C92 /* ExpandingCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ExpandingCell.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -130,6 +135,7 @@
 		7A00586818B969F400CB1BBD /* PicturePerfect */ = {
 			isa = PBXGroup;
 			children = (
+				7A4ADA9B18BD8ACC003A0C92 /* Expanding Cell */,
 				7A0058A318B977DB00CB1BBD /* PPImageProcessing.h */,
 				7A0058A418B977DB00CB1BBD /* PPImageProcessing.m */,
 				7A00587118B969F400CB1BBD /* PPAppDelegate.h */,
@@ -183,6 +189,16 @@
 				7A00589A18B9777F00CB1BBD /* MainStoryboard_iPad.storyboard */,
 			);
 			name = Storyboards;
+			sourceTree = "<group>";
+		};
+		7A4ADA9B18BD8ACC003A0C92 /* Expanding Cell */ = {
+			isa = PBXGroup;
+			children = (
+				7A4ADA9F18BD8AE4003A0C92 /* ExpandingCell.xib */,
+				7A4ADA9C18BD8ADE003A0C92 /* Cell.h */,
+				7A4ADA9D18BD8ADE003A0C92 /* Cell.m */,
+			);
+			name = "Expanding Cell";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -268,6 +284,7 @@
 				7A00589C18B9777F00CB1BBD /* MainStoryboard_iPad.storyboard in Resources */,
 				7A0058A218B977D000CB1BBD /* redSquarePNG.png in Resources */,
 				7A0058A118B977D000CB1BBD /* greenSquarePNG.png in Resources */,
+				7A4ADAA018BD8AE4003A0C92 /* ExpandingCell.xib in Resources */,
 				7A00587B18B969F400CB1BBD /* Images.xcassets in Resources */,
 				7A00586D18B969F400CB1BBD /* InfoPlist.strings in Resources */,
 			);
@@ -326,6 +343,7 @@
 				7A0058A818B977E900CB1BBD /* PPSettingsTableViewController.m in Sources */,
 				7A00589918B96A2500CB1BBD /* PPViewController.m in Sources */,
 				7A00586F18B969F400CB1BBD /* main.m in Sources */,
+				7A4ADA9E18BD8ADE003A0C92 /* Cell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
